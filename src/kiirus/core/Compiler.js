@@ -73,7 +73,7 @@ const SVG_ELEMENTS = [
   'view'
 ]
 
-/* export default */module.exports = class Compiler {
+export default class Compiler {
   static compile (template) {
     return this.parse(this.lexer(template))
   }

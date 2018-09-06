@@ -1,7 +1,7 @@
 import Compiler from './Compiler'
+// import Compiler from './NewCompiler'
 import Template from './Template'
 import VirtualDom from './VirtualDom'
-// import { Compiler, Template, VirtualDom } from './'
 
 export class Component extends HTMLElement {
   static define (component, target, attributes = {}) {
@@ -14,7 +14,6 @@ export class Component extends HTMLElement {
     if (target !== undefined) {
       let instance = new component(attributes)
 
-      // target.appendChild(instance)
       target.replaceChild(instance, target.childNodes[0])
 
       return instance
@@ -24,7 +23,7 @@ export class Component extends HTMLElement {
   }
 
   static getComponentName (tagName) {
-    return tagName[0].toUpperCase() + 
+    return tagName[0].toUpperCase() +
       tagName.replace(/(\-\w)/g, (match) => match[1].toUpperCase()).slice(1)
   }
 
@@ -34,18 +33,11 @@ export class Component extends HTMLElement {
     }).join('-')
   }
 
-  // static register () {
-  //   const internalTags = ['router-outlet']
-
-  //   document.querySelectorAll(':not(:defined)').forEach(element => {
-  //     const tagName = element.tagName.toLowerCase()
-  //     const classReference = this.getClassReference(this.getComponentName(tagName))
-      
-  //     console.log(classReference)
-  //   })
-  // }
-
-  static register (components) {
+  /**
+   *
+   * @param {Array} components
+   */
+  static register (components = []) {
     components.forEach(component => {
       this.define(component)
     })
@@ -67,19 +59,42 @@ export class Component extends HTMLElement {
 
     this.virtualDom = new VirtualDom(this)
 
-    const shadowRoot = this.attachShadow({mode: 'open'})
+    // const shadowRoot = this.attachShadow({mode: 'open'})
 
-    // const template = Template.assemble(Template.compile(this.render(), this.state))
-    const template = Template.assemble(Template.compile(this.render()))
+    // const template = Template.assemble(Template.compile(this.render()))
 
-    // this.virtualDom.updateElement(shadowRoot, Compiler.compile(this.render()))
-    this.virtualDom.updateElement(shadowRoot, Compiler.compile(template(this.state)))
+    // this.virtualDom.updateElement(
+    //   shadowRoot,
+    //   Compiler.compile(template(this.state))
+    // )
   }
 
   connectedCallback () {
+    this.update()
   }
 
   disconnectedCallback () {
+  }
+
+  setState (state) {
+    for (let key in state) {
+      this.state[key] = state[key]
+
+      // this.setAttribute(key, state[key])
+    }
+
+    // this.shadowRoot.innerHTML = this.render()
+    this.update()
+  }
+
+  update () {
+    const shadowRoot = this.attachShadow({mode: 'open'})
+    const template = Template.assemble(Template.compile(this.render()))
+
+    this.virtualDom.updateElement(
+      shadowRoot,
+      Compiler.compile(template(this.state))
+    )
   }
 
   static getClassReference (className) {

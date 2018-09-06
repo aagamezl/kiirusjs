@@ -15,16 +15,16 @@ const whitespaceRE = /^\s+$/
 const identationRegex = /^[\s|\t]+/gmi
 const cssCommentsRegex = /(\/\*[\s\S]*?\*\/)/gi
 
-module.exports = class Compiler {
-  compile (input) {
+export default class Compiler {
+  static compile (input) {
     return this.parse(input.replace(cssCommentsRegex, ''))
   }
 
-  isComponentType (type) {
+  static isComponentType (type) {
      return type[0] === type[0].toUpperCase() && type[0] !== type[0].toLowerCase()
   }
 
-  parse (input) {
+  static parse (input) {
     const length = input.length
 
     const root = {
@@ -36,30 +36,30 @@ module.exports = class Compiler {
       children: []
     }
 
-    let stack = [root]
+    const stack = [root]
 
-    for (let i = 0; i < length;) {
-      const char = input[i]
+    for (let index = 0; index < length;) {
+      const char = input[index]
 
       if (char === '<') {
-        if (input[i + 1] === '!' && input[i + 2] === '-' && input[i + 3] === '-') {
-          i = this.parseComment(i + 4, input, length)
-        } else if (input[i + 1] === '/') {
-          i = this.parseClosingTag(i + 2, input, length, stack)
+        if (input[index + 1] === '!' && input[index + 2] === '-' && input[index + 3] === '-') {
+          index = this.parseComment(index + 4, input, length)
+        } else if (input[index + 1] === '/') {
+          index = this.parseClosingTag(index + 2, input, length, stack)
         } else {
-          i = this.parseOpeningTag(i + 1, input, length, stack)
+          index = this.parseOpeningTag(index + 1, input, length, stack)
         }
       } else if (char === '{') {
-        i = this.parseExpression(i + 1, input, length, stack)
+        index = this.parseExpression(index + 1, input, length, stack)
       } else {
-        i = this.parseText(i, input, length, stack)
+        index = this.parseText(index, input, length, stack)
       }
     }
 
     return root
   }
 
-  parseAttributes (index, input, length, attributes) {
+  static parseAttributes (index, input, length, attributes) {
     while (index < length) {
       let char = input[index]
 
@@ -90,6 +90,7 @@ module.exports = class Compiler {
 
         if (value === undefined) {
           let quote
+
           value = ''
           char = input[index]
 
@@ -127,12 +128,6 @@ module.exports = class Compiler {
           dynamic = template.dynamic
         }
 
-        // attributes.push({
-          // key: key,
-          // value: value,
-          // expression: expression,
-          // dynamic: dynamic
-        // })
         attributes[key] = value
       }
     }
@@ -140,7 +135,7 @@ module.exports = class Compiler {
     return index
   }
 
-  parseClosingTag (index, input, length, stack) {
+  static parseClosingTag (index, input, length, stack) {
     let type = ''
 
     for(; index < length; index++) {
@@ -162,7 +157,7 @@ module.exports = class Compiler {
     return index
   }
 
-  parseComment (index, input, length) {
+  static parseComment (index, input, length) {
     while (index < length) {
       const char0 = input[index]
       const char1 = input[index + 1]
@@ -182,7 +177,7 @@ module.exports = class Compiler {
     return index
   }
 
-  parseExpression (index, input, length, stack) {
+  static parseExpression (index, input, length, stack) {
     let expression = ''
 
     for (; index < length; index++) {
@@ -198,16 +193,7 @@ module.exports = class Compiler {
     }
 
     const template = this.parseTemplate(expression)
-    // stack[stack.length - 1].children.push({
-    //   type: 'Text',
-    //   attributes: [{
-    //     key: '',
-    //     value: template.expression,
-    //     expression: true,
-    //     dynamic: template.dynamic
-    //   }],
-    //   children: []
-    // })
+
     stack[stack.length - 1].children.push(
       template.expression
     )
@@ -215,7 +201,7 @@ module.exports = class Compiler {
     return index
   }
 
-  parseOpeningTag (index, input, length, stack) {
+  static parseOpeningTag (index, input, length, stack) {
     const element = {
       type: '',
       props: {},
@@ -242,10 +228,6 @@ module.exports = class Compiler {
             element = {
               type: attribute.key,
               props: [{
-                // key: '',
-                // value: attribute.value,
-                // expression: attribute.expression,
-                // dynamic: attribute.dynamic
                 [Object.keys(attribute)[0]]: Object.values(attribute)[0]
               }],
               children: [element]
@@ -272,7 +254,7 @@ module.exports = class Compiler {
     return index
   }
 
-  parseTemplate (expression) {
+  static parseTemplate (expression) {
     let dynamic = false
 
     expression = expression.replace(expressionRE, (match, name) => {
@@ -295,7 +277,7 @@ module.exports = class Compiler {
     }
   }
 
-  parseText (index, input, length, stack) {
+  static parseText (index, input, length, stack) {
     let content = ''
 
     for (; index < length; index++) {
@@ -309,18 +291,6 @@ module.exports = class Compiler {
     }
 
     if (!whitespaceRE.test(content)) {
-      // stack[stack.length - 1].children.push({
-      // stack[stack.length - 1].children.push({
-      //   type: 'Text',
-      //   attributes: [{
-      //     key: '',
-      //     value: content.replace(escapeRE, (match) => escapeMap[match]),
-      //     expression: false,
-      //     dynamic: false
-      //   }],
-      //   children: []
-      // })
-
       stack[stack.length - 1].children.push(
         content.replace(escapeRE, (match) => escapeMap[match])
       )
