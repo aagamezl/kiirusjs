@@ -12,6 +12,8 @@ export class CustomTab extends Component {
   }
 
   connectedCallback () {
+    super.connectedCallback()
+
     const tabsSlot = this.shadowRoot.querySelector('#tabsSlot')
 
     const panelsSlot = this.shadowRoot.querySelector('#panelsSlot')

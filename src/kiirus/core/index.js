@@ -1,6 +1,7 @@
 export * from './Compiler'
 export * from './Component'
 export * from './Helper'
+export * from './Http'
 export * from './Router'
 export * from './RouterLink'
 export * from './Template'
