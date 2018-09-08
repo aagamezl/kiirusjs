@@ -1,5 +1,5 @@
-import Compiler from './Compiler'
-// import Compiler from './NewCompiler'
+// import Compiler from './Compiler'
+import Compiler from './NewCompiler'
 import Template from './Template'
 import VirtualDom from './VirtualDom'
 
@@ -88,6 +88,9 @@ export class Component extends HTMLElement {
   }
 
   update () {
+    const timer = `update-time-${this.constructor.name}`
+    console.time(timer)
+
     const shadowRoot = this.attachShadow({mode: 'open'})
     const template = Template.assemble(Template.compile(this.render()))
 
@@ -95,6 +98,8 @@ export class Component extends HTMLElement {
       shadowRoot,
       Compiler.compile(template(this.state))
     )
+
+    console.timeEnd(timer)
   }
 
   static getClassReference (className) {

@@ -1,7 +1,7 @@
 // const forRegex = /\s+data-for=\"(\w+)\s+in\s+(\w+)\"/gm
 // const forRegex = /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
 const expressions = {
-  forStatement: /\s+data-for=\"(\w+)\s+in\s+(\w+)\"/gm,
+  forStatement: /\s+data-for=\"(\w+)\s+in\s+(.+)\"/gm,
   forExpression:  /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
 }
 const placeholderRegex = /({.+})/gm

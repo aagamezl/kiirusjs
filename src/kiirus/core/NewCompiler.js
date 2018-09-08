@@ -4,9 +4,9 @@ const escapeMap = {
   '&gt;': '>',
   '&lt;': '<',
   '&nbsp;': ' ',
-  '&quot;': "\\\"",
-  '\\': "\\\\",
-  '"': "\\\"",
+  '&quot;': '\\"',
+  '\\': '\\\\',
+  '"': '\\"',
   '\n': '\\n'
 }
 const expressionRE = /"[^"]*"|'[^']*'|\d+[a-zA-Z$_]\w*|\.[a-zA-Z$_]\w*|[a-zA-Z$_]\w*:|([a-zA-Z$_]\w*)/g
@@ -291,9 +291,10 @@ export default class Compiler {
     }
 
     if (!whitespaceRE.test(content)) {
-      stack[stack.length - 1].children.push(
-        content.replace(escapeRE, (match) => escapeMap[match])
-      )
+      // stack[stack.length - 1].children.push(
+      //   content.replace(escapeRE, (match) => escapeMap[match])
+      // )
+      stack[stack.length - 1].children.push(content)
     }
 
     return index
