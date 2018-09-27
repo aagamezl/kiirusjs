@@ -1,23 +1,27 @@
 // import Compiler from './Compiler'
 import Compiler from './NewCompiler'
+import VirtualDom from './NewVirtualDom'
+import { parseHtml } from './HtmlParser'
 import Template from './Template'
-import VirtualDom from './VirtualDom'
 
 export class Component extends HTMLElement {
   static define (component, target, attributes = {}) {
     const tagName = this.getTagName(component)
 
+    // Check if the custom element is not defined yet
     if (window.customElements.get(tagName) === undefined) {
       window.customElements.define(tagName, component)
     }
 
-    if (target !== undefined) {
-      let instance = new component(attributes)
+    // if (target !== undefined) {
+    //   let instance = new component(attributes)
 
-      target.replaceChild(instance, target.childNodes[0])
+    //   target.replaceChild(instance, target.childNodes[0])
 
-      return instance
-    }
+    //   return instance
+    // }
+
+    VirtualDom.mount(VirtualDom.createElement(component), target)
 
     return document.querySelector(tagName)
   }
@@ -43,67 +47,68 @@ export class Component extends HTMLElement {
     })
   }
 
-  constructor (attributes) {
-    super(attributes)
+  constructor (props) {
+    super(props)
 
+    this.props = props || {}
     this.state = {}
 
-    if (this.attributes.length > 0) {
-      // Map attributes to state
-      for (let attribute of this.attributes) {
-        this.state[attribute.name] = attribute.value
-      }
-    } else {
-      this.state = attributes
-    }
+    this._currentElement = null
+    this._pendingState = null
+    this._parentNode = null
 
-    this.virtualDom = new VirtualDom(this)
+    this.attachShadow({mode: 'open'})
 
-    // const shadowRoot = this.attachShadow({mode: 'open'})
-
-    // const template = Template.assemble(Template.compile(this.render()))
-
-    // this.virtualDom.updateElement(
-    //   shadowRoot,
-    //   Compiler.compile(template(this.state))
-    // )
+    // this.updateComponent()
   }
 
+  // will be overridden
   connectedCallback () {
-    this.update()
   }
 
+  // will be overridden
   disconnectedCallback () {
   }
 
-  setState (state) {
-    for (let key in state) {
-      this.state[key] = state[key]
+  // will be overridden
+  render() { }
 
-      // this.setAttribute(key, state[key])
+  setState(partialNewState) {
+    // I know this looks weired. Why don't pass state to updateComponent()
+    // function, I agree.
+    // We're just getting a little familiair with putting data on instances.
+    // seomthing that React uses heavily :)
+    this._pendingState = { ...this.state, ...partialNewState }
+
+    this.updateComponent()
+  }
+
+  setTemplate () {
+    if (this.template === undefined) {
+      this.template = Template.assemble(Template.compile(this.render()))
+
+      this.template.bind(this)
+    }
+  }
+
+  shouldComponentUpdate() {
+    return true
+  }
+
+  updateComponent() {
+    const prevState = this.state
+    const prevElement = this._currentElement
+
+    if (this._pendingState !== prevState) {
+      this.state = this._pendingState
     }
 
-    // this.shadowRoot.innerHTML = this.render()
-    this.update()
-  }
+    this._pendingState = null
 
-  update () {
-    const timer = `update-time-${this.constructor.name}`
-    console.time(timer)
+    const nextElement = parseHtml(this.render())
 
-    const shadowRoot = this.attachShadow({mode: 'open'})
-    const template = Template.assemble(Template.compile(this.render()))
+    this._currentElement = nextElement
 
-    this.virtualDom.updateElement(
-      shadowRoot,
-      Compiler.compile(template(this.state))
-    )
-
-    console.timeEnd(timer)
-  }
-
-  static getClassReference (className) {
-    return eval(className)
-    // return new Function(`use strict; return ${className}`)()
+    VirtualDom.update(prevElement, nextElement, this._parentNode)
   }
 }

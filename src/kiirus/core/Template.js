@@ -1,8 +1,14 @@
 // const forRegex = /\s+data-for=\"(\w+)\s+in\s+(\w+)\"/gm
 // const forRegex = /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
 const expressions = {
-  forStatement: /\s+data-for=\"(\w+)\s+in\s+(.+)\"/gm,
-  forExpression:  /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
+  for: {
+    statement: /\s+data-for=\"(\w+)\s+in\s+(.+)\"/gm,
+    expression:  /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm,
+  },
+  if: {
+    statement: /\s+data-if=\"\s*.+\s*\"/gm,
+    expression: /<(\w+)\s+(data-if=\"(.+)\")>[\s\S]*?<\/\1>/gm,
+  },
 }
 const placeholderRegex = /({.+})/gm
 
@@ -28,6 +34,8 @@ export default class Template {
    */
   static compile (template) {
     let html = this.compileFor(this.fixPlaceholders(template))
+
+    html = this.compileIf(html)
 
     return html
   }
@@ -62,16 +70,37 @@ export default class Template {
       // html = html.replace(forStatement.expression, '')
       // forStatement.template = forStatement.template.replace(forStatement.expression, '')
 
-      const compiled = '${' + params + '.' + forStatement.collection +
+      // const compiled = '${' + params + '.' + forStatement.collection +
+      const compiled = '${' + forStatement.collection +
         '.map((' + forStatement.iterator + ', index) => ' +
         // '`' + html + '`).join(\'\')}'
         '`' + forStatement.template + '`).join(\'\')}'
 
       html = html.replace(forStatement.template, compiled)
-      html = html.replace(expressions.forStatement, '')
+      html = html.replace(expressions.for.statement, '')
     }
 
     return html
+  }
+
+  static compileIf (html) {
+    const ifStatement = this.parseIf(html)
+
+    console.log(ifStatement)
+
+    if (ifStatement) {
+      const compiled = '${' + ifStatement.conditional + ' ? `' + 
+        ifStatement.template + `\` : ''}`
+
+      html = html.replace(ifStatement.template, compiled)
+      html = html.replace(expressions.if.statement, '')
+    }
+    
+    return html
+  }
+
+  static parse (template) {
+    
   }
 
   /**
@@ -83,7 +112,7 @@ export default class Template {
    */
   static parseFor (html) {
     // const match = forRegex.exec(html)
-    const match = expressions.forExpression.exec(html)
+    const match = expressions.for.expression.exec(html)
 
     if (match) {
       return {
@@ -91,6 +120,25 @@ export default class Template {
         expression: match[2],
         iterator: match[3],
         collection: match[4],
+      }
+    }
+
+    return undefined
+  }
+
+  static parseIf(html) {
+    const match = expressions.if.expression.exec(html)
+
+    // <div data-if="this.state.show === true">
+    //   <span>This is a conditional message</span>
+    // </div>
+
+    if (match) {
+      return {
+        template: match[0],
+        expression: match[2],
+        conditional: match[3],
+        // collection: match[4], // delete this and delete the group in the regex
       }
     }
 

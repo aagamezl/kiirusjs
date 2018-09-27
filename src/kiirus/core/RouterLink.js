@@ -36,4 +36,4 @@ export class RouterLink extends Component {
   }
 }
 
-Component.define(RouterLink)
+// Component.define(RouterLink)
