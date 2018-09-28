@@ -1,8 +1,7 @@
 // import Compiler from './Compiler'
-import Compiler from './NewCompiler'
-import VirtualDom from './NewVirtualDom'
-import { parseHtml } from './HtmlParser'
-import Template from './Template'
+// import Compiler from './NewCompiler'
+import { Template, VirtualDom } from './'
+// import Template from './Template'
 
 export class Component extends HTMLElement {
   static define (component, target, attributes = {}) {
@@ -105,7 +104,7 @@ export class Component extends HTMLElement {
 
     this._pendingState = null
 
-    const nextElement = parseHtml(this.render())
+    const nextElement = Template.parse(this.render(), this)
 
     this._currentElement = nextElement
 

@@ -5,7 +5,7 @@ export * from './Http'
 export * from './Router'
 export * from './RouterLink'
 export * from './Template'
-export * from './VirtualDom'
+export * from './NewVirtualDom'
 
 // function component() {
 //   var element = document.createElement('div')

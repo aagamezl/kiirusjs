@@ -1,4 +1,4 @@
-import { parseHtml } from './HtmlParser'
+import { Template } from './'
 
 const viewEncapsulation = {
   Emulated: 0,
@@ -6,7 +6,7 @@ const viewEncapsulation = {
   ShadowDom: 2,
 }
 
-export default class VirtualDom {
+export class VirtualDom {
   static get viewEncapsulation () {
     return this.encapsulation || viewEncapsulation.ShadowDom
   }
@@ -94,7 +94,7 @@ export default class VirtualDom {
     const Component = tag
     const instance = new Component(props)
 
-    const nextRenderedElement = parseHtml(instance.render())
+    const nextRenderedElement = Template.parse(instance.render(), instance)
 
     //create a reference of our currenElement
     //on our component instance.
