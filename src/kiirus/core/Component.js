@@ -1,7 +1,4 @@
-// import Compiler from './Compiler'
-// import Compiler from './NewCompiler'
-import { Template, VirtualDom } from './'
-// import Template from './Template'
+import { Template, ViewEncapsulation, VirtualDom } from './'
 
 export class Component extends HTMLElement {
   static define (component, target, attributes = {}) {
@@ -12,22 +9,18 @@ export class Component extends HTMLElement {
       window.customElements.define(tagName, component)
     }
 
-    // if (target !== undefined) {
-    //   let instance = new component(attributes)
+    if (target !== undefined) {
+      const instance = new component(attributes)
 
-    //   target.replaceChild(instance, target.childNodes[0])
+      // target.appendChild(instance)
+      if (target.childNodes.length > 0) {
+        target.replaceChild(instance, target.childNodes[0])
+      } else {
+        target.appendChild(instance)
+      }
 
-    //   return instance
-    // }
-
-    VirtualDom.mount(VirtualDom.createElement(component), target)
-
-    return document.querySelector(tagName)
-  }
-
-  static getComponentName (tagName) {
-    return tagName[0].toUpperCase() +
-      tagName.replace(/(\-\w)/g, (match) => match[1].toUpperCase()).slice(1)
+      return instance
+    }
   }
 
   static getTagName (component) {
@@ -36,58 +29,69 @@ export class Component extends HTMLElement {
     }).join('-')
   }
 
-  /**
-   *
-   * @param {Array} components
-   */
-  static register (components = []) {
-    components.forEach(component => {
-      this.define(component)
-    })
+  // can be overridden
+  static get viewEncapsulation () {
+    return ViewEncapsulation.ShadowDom
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props)
+
+    if (this.constructor.viewEncapsulation === ViewEncapsulation.ShadowDom) {
+      this.attachShadow({mode: 'open'})
+    }
 
     this.props = props || {}
     this.state = {}
 
+    if (this.attributes.length > 0) {
+      // Map attributes to props
+      for (let attribute of this.attributes) {
+        this.props[attribute.name] = attribute.value
+      }
+    }
+
     this._currentElement = null
     this._pendingState = null
     this._parentNode = null
-
-    this.attachShadow({mode: 'open'})
-
-    // this.updateComponent()
   }
 
   // will be overridden
   connectedCallback () {
+    const timer = `update-time-connectedCallback-${this.constructor.name}`
+    console.time(timer)
+
+    const vComponent = VirtualDom.createElement(this.constructor)
+
+    if (this.shadowRoot) {
+      VirtualDom.mountVComponentToDOM(vComponent, this.shadowRoot, this)
+    } else {
+      VirtualDom.mountVComponentToDOM(vComponent, this, this)
+    }
+
+    console.timeEnd(timer)
   }
 
   // will be overridden
   disconnectedCallback () {
   }
 
-  // will be overridden
-  render() { }
+  //will be overridden
+  render () { }
 
-  setState(partialNewState) {
+  setState (partialNewState) {
     // I know this looks weired. Why don't pass state to updateComponent()
     // function, I agree.
     // We're just getting a little familiair with putting data on instances.
     // seomthing that React uses heavily :)
     this._pendingState = { ...this.state, ...partialNewState }
 
+    const timer = `update-time-setState-${this.constructor.name}`
+    console.time(timer)
+
     this.updateComponent()
-  }
 
-  setTemplate () {
-    if (this.template === undefined) {
-      this.template = Template.assemble(Template.compile(this.render()))
-
-      this.template.bind(this)
-    }
+    console.timeEnd(timer)
   }
 
   shouldComponentUpdate() {
@@ -108,6 +112,6 @@ export class Component extends HTMLElement {
 
     this._currentElement = nextElement
 
-    VirtualDom.update(prevElement, nextElement, this._parentNode)
+    VirtualDom.update(prevElement, nextElement, this._parentNode, this)
   }
 }

@@ -1,147 +1,285 @@
-export default class VirtualDom {
-  constructor (component/* nodes */) {
-    // this.nodes = nodes
-    this.component = component
+import { ViewEncapsulation, Template } from '.'
+
+const eventRegex = /(\w+)\(?(.*)\)?/
+
+export class VirtualDom {
+  static createElement (tag, config, children) {
+    // If the tag is a function. We have a component!
+    // we will see later why.
+    if (typeof tag === 'function') {
+      //of course we could do some checks here if the props are
+      //valid or not.
+      const vNode = this.createVComponent(tag, config)
+
+      return vNode
+    }
+
+    //Add children on our props object, just as in React. Where
+    //we can acces it using this.props.children
+
+    const vNode = this.createVElement(tag, config, children)
+
+    return vNode
   }
 
-  addEventListeners ($target, props) {
-    Object.keys(props).forEach(name => {
-      if (this.isEventProp(name)) {
-        $target.addEventListener(
-          this.extractEventName(name),
-          this.component[props[name]].bind(this.component)
-        )
+  static createVComponent (tag, props) {
+    return {
+      tag: tag,
+      props: props,
+      dom: null,
+    }
+  }
+
+  /**
+   *
+   * @param {string} tag
+   * @param {object} config
+   * @param {Objet[]} [children = []]
+   */
+  static createVElement (tag, config, children = []) {
+    const { className, style, ...props } = config
+
+    return {
+      tag: tag,
+      style: style,
+      props: {
+        children: children,
+        ...props
+      },
+      className: className,
+      dom: null,
+    }
+  }
+
+  static extractEventName (name) {
+    return name.slice(5).toLowerCase()
+  }
+
+  static isEventProp (name) {
+    return /^data-click/.test(name)
+  }
+
+  static mount (input, parentDOMNode, instance) {
+    if (typeof input === 'string' || typeof input === 'number') {
+      //we have a vText
+      return this.mountVText(input, parentDOMNode)
+    } else if (typeof input.tag === 'function') {
+      //we have a component
+      return this.mountVComponent(input, parentDOMNode)
+    }
+    // for brevity make an else if statement. An
+    // else would suffice.
+    else if (typeof input.tag === 'string') {
+      //we have a vElement
+      return this.mountVElement(input, parentDOMNode, instance)
+    }
+  }
+
+  static mountVComponent (vComponent, parentDOMNode) {
+    const { tag, props } = vComponent
+
+    const Component = tag
+    const instance = new Component(props)
+
+    return VirtualDom.mountVComponentToDOM(vComponent, parentDOMNode, instance)
+  }
+
+  static mountVComponentToDOM(vComponent, parentDOMNode, instance) {
+    const nextRenderedElement = Template.parse(instance.render(), instance)
+
+    //create a reference of our currenElement
+    //on our component instance.
+    instance._currentElement = nextRenderedElement
+
+    //create a reference to the passed
+    //DOMNode. We might need it.
+    instance._parentNode = parentDOMNode
+
+    const dom = this.mount(nextRenderedElement, parentDOMNode, instance)
+
+    //save the instance for later references.
+    vComponent._instance = instance
+
+    vComponent.dom = dom
+
+    if (instance.constructor.viewEncapsulation === ViewEncapsulation.Emulated) {
+      dom.classList.add('component-emulated')
+    }
+
+    return instance
+  }
+
+  static mountVElement (vElement, parentDOMNode, instance) {
+    const { className, tag, props, style } = vElement
+    const { children, ...otherProps } = props
+
+    const domNode = document.createElement(tag)
+
+    vElement.dom = domNode
+
+    if (children) {
+      if (!Array.isArray(children)) {
+        this.mount(children, domNode, instance)
+      } else {
+        children.forEach(child => this.mount(child, domNode, instance))
       }
-    })
-  }
-
-  changed (newNode, oldNode) {
-    return typeof newNode !== typeof oldNode ||
-      typeof newNode === 'string' && newNode !== oldNode ||
-      newNode.type !== oldNode.type ||
-      newNode.props && newNode.props.forceUpdate
-  }
-
-  createElement (node) {
-    if (typeof node === 'string') {
-      return document.createTextNode(node)
     }
 
-    const $el = document.createElement(node.type)
+    if (otherProps) {
+      for (const [name, value] of Object.entries(otherProps)) {
+        if (this.isEventProp(name)) {
+          const [event, method, parameters] = value.match(eventRegex)
 
-    this.setProps($el, node.props)
-    this.addEventListeners($el, node.props)
-
-    node.children
-      .map(this.createElement.bind(this))
-      .forEach($el.appendChild.bind($el))
-
-    return $el
-  }
-
-  extractEventName (name) {
-    return name.slice(2).toLowerCase()
-  }
-
-  isCustomProp (name) {
-    return this.isEventProp(name) || name === 'forceUpdate'
-  }
-
-  isEventProp (name) {
-    return /^on/.test(name)
-  }
-
-  removeBooleanProp ($target, name) {
-    $target.removeAttribute(name)
-    $target[name] = false
-  }
-
-  removeProp ($target, name, value) {
-    if (isCustomProp(name)) {
-      return
-    } else if (name === 'className') {
-      $target.removeAttribute('class')
-    } else if (typeof value === 'boolean') {
-      removeBooleanProp($target, name)
-    } else {
-      $target.removeAttribute(name)
+          domNode.addEventListener(
+            this.extractEventName(name),
+            instance[method].bind(instance)
+          )
+        } else if (typeof value === 'boolean') {
+          this.setBooleanProp(domNode, name, value)
+        } else {
+          domNode.setAttribute(name, value)
+        }
+      }
     }
+
+    if (className !== undefined) {
+      domNode.className = className
+    }
+
+    if (style !== undefined) {
+      Object.keys(style).forEach(sKey => domNode.style[sKey] = style[sKey])
+    }
+
+    parentDOMNode.appendChild(domNode)
+
+    return domNode
   }
 
-  setBooleanProp ($target, name, value) {
+  static mountVText (vText, parentDOMNode) {
+    // Oeeh we received a vText with it's associated parentDOMNode.
+    // we can set it's textContent to the vText value.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
+    parentDOMNode.textContent = vText
+  }
+
+  static setBooleanProp (domNode, name, value) {
     if (value) {
-      $target.setAttribute(name, value)
-      $target[name] = true
+      domNode.setAttribute(name, value)
+      domNode[name] = true
     } else {
-      $target[name] = false
+      domNode[name] = false
     }
   }
 
-  setProp ($target, name, value) {
-    if (this.isCustomProp(name)) {
-      return
-    } else if (name === 'className') {
-      $target.setAttribute('class', value)
-    } else if (typeof value === 'boolean') {
-      this.setBooleanProp($target, name, value)
+  static update (prevElement, nextElement, parentDOMNode, instance) {
+    //Implement the first assumption!
+    if (prevElement && prevElement.tag === nextElement.tag) {
+      //Inspect the type. If the `tag` is a string
+      //we have a `vElement`. (we should actually
+      //made some helper functions for this ;))
+      if (typeof prevElement.tag === 'string') {
+        this.updateVElement(prevElement, nextElement, instance)
+      } else if (typeof prevElement.tag === 'function') {
+        this.updateVComponent(prevElement, nextElement)
+      }
     } else {
-      $target.setAttribute(name, value)
+      this.mountVElement(nextElement, parentDOMNode, instance)
+      //Oh oh two elements of different types. We don't want to
+      //look further in the tree! We need to replace it!
     }
   }
 
-  setProps ($target, props) {
-    Object.keys(props).forEach(name => {
-      this.setProp($target, name, props[name])
-    })
-  }
+  static updateChildren (prevChildren, nextChildren, parentDOMNode, instance) {
+    if (!Array.isArray(nextChildren)) {
+      nextChildren = [nextChildren]
+    }
 
-  updateElement ($parent, newNode, oldNode, index = 0) {
-    if (!oldNode) {
-      $parent.appendChild(
-        this.createElement(newNode)
-      )
-    } else if (!newNode) {
-      $parent.removeChild(
-        $parent.childNodes[index]
-      )
-    } else if (this.changed(newNode, oldNode)) {
-      $parent.replaceChild(
-        this.createElement(newNode),
-        $parent.childNodes[index]
-      )
-    } else if (newNode.type) {
-      this.updateProps(
-        $parent.childNodes[index],
-        newNode.props,
-        oldNode.props
-      )
+    if (!Array.isArray(prevChildren)) {
+      prevChildren = [prevChildren]
+    }
 
-      const newLength = newNode.children.length
-      const oldLength = oldNode.children.length
+    for (let i = 0; i < nextChildren.length; i++) {
+      //We're skipping a lot of cases here. Like what if
+      //the children array have different lenghts? Then we
+      //should replace smartly etc. :)
+      const nextChild = nextChildren[i]
+      const prevChild = prevChildren[i]
 
-      for (let i = 0; i < newLength || i < oldLength; i++) {
-        this.updateElement(
-          $parent.childNodes[index],
-          newNode.children[i],
-          oldNode.children[i],
-          i
-        )
+      //Check if the vNode is a vText
+      if (typeof nextChild === 'string' && typeof prevChild === 'string') {
+        //We're taking a shortcut here. It would cleaner to
+        //let the `update` function handle it, but we would to add some extra
+        //logic because we don't have a `tag` property.
+        this.updateVText(prevChild, nextChild, parentDOMNode)
+
+        continue
+      } else {
+        this.update(prevChild, nextChild, parentDOMNode, instance)
       }
     }
   }
 
-  updateProp ($target, name, newVal, oldVal) {
-    if (!newVal) {
-      removeProp($target, name, oldVal)
-    } else if (!oldVal || newVal !== oldVal) {
-      setProp($target, name, newVal)
+  // static updateComponent () {
+  //   const prevState = this.state
+  //   const prevRenderedElement = this._currentElement
+
+  //   if (this._pendingState !== prevState) {
+  //     this.state = this._pendingState
+  //   }
+
+  //   this._pendingState = null
+
+  //   const nextRenderedElement = this.render()
+
+  //   this._currentElement = nextRenderedElement
+
+  //   this.mount(nextRenderedElement, this._parentNode)
+  // }
+
+  static updateVElement (prevElement, nextElement, instance) {
+    const dom = prevElement.dom
+
+    nextElement.dom = dom
+
+    if (nextElement.props.children) {
+      this.updateChildren(prevElement.props.children, nextElement.props.children, dom, instance)
+    }
+
+    if (prevElement.style !== nextElement.style) {
+      Object.keys(nextElement.style).forEach((s) => dom.style[s] = nextElement.style[s])
     }
   }
 
-  updateProps ($target, newProps, oldProps = {}) {
-    const props = Object.assign({}, newProps, oldProps)
-    Object.keys(props).forEach(name => {
-      updateProp($target, name, newProps[name], oldProps[name])
-    })
+  static updateVComponent (prevComponent, nextComponent) {
+    //get the instance. This is Component. It also
+    //holds the props and _currentElement;
+    const { _instance } = prevComponent
+    const { _currentElement } = _instance
+
+    //get the new and old props!
+    const prevProps = prevComponent.props
+    const nextProps = nextComponent.props
+
+    //Time for the big swap!
+    nextComponent.dom = prevComponent.dom
+    nextComponent._instance = _instance
+    nextComponent._instance.props = nextProps
+
+    if (_instance.shouldComponentUpdate()) {
+      const prevRenderedElement = _currentElement
+      const nextRenderedElement = _instance.render()
+
+      //finaly save the nextRenderedElement for the next iteration!
+      nextComponent._instance._currentElement = nextRenderedElement
+
+      //call update
+      this.update(prevRenderedElement, nextRenderedElement, _instance._parentNode)
+    }
+  }
+
+  static updateVText (prevText, nextText, parentDOM) {
+    if (prevText !== nextText) {
+      parentDOM.firstChild.nodeValue = nextText
+    }
   }
 }

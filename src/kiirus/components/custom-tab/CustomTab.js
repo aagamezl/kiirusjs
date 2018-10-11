@@ -6,9 +6,6 @@ export class CustomTab extends Component {
 
   constructor (attributes) {
     super(attributes)
-
-    // this.onTitleClick = this.onTitleClick.bind(this)
-    // this.onKeyDown = this.onKeyDown.bind(this)
   }
 
   connectedCallback () {
@@ -18,10 +15,10 @@ export class CustomTab extends Component {
 
     const panelsSlot = this.shadowRoot.querySelector('#panelsSlot')
 
-    this.tabs = tabsSlot.assignedNodes({flatten: true})
+    this.tabs = tabsSlot.assignedNodes({ flatten: true })
 
     this.panels = panelsSlot
-      .assignedNodes({flatten: true})
+      .assignedNodes({ flatten: true })
       .filter((element) => {
         return element.nodeType === Node.ELEMENT_NODE;
       })
@@ -32,14 +29,12 @@ export class CustomTab extends Component {
       panel.setAttribute('tabindex', 0);
     }
 
-    // tabsSlot.addEventListener('click', this.onTitleClick)
-
-    // tabsSlot.addEventListener('keydown', this.onKeyDown)
-
     this.selectTab(this.findFirstSelectedTab() || 0)
   }
 
   disconnectedCallback () {
+    super.disconnectedCallback()
+
     const tabsSlot = this.shadowRoot.querySelector('#tabsSlot')
 
     tabsSlot.removeEventListener('click', this.onTitleClick)
@@ -163,7 +158,7 @@ export class CustomTab extends Component {
           }
         </style>
         <div id="tabs">
-          <slot id="tabsSlot" name="title" onClick="onTitleClick" onKeydown="onKeyDown"></slot>
+          <slot id="tabsSlot" name="title" data-click="onTitleClick" onKeydown="onKeyDown"></slot>
         </div>
         <div id="panels">
           <slot id="panelsSlot"></slot>

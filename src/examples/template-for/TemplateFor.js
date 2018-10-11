@@ -1,7 +1,6 @@
-import { Component, Http } from './../../kiirus/core'
+import { Component, Http, ViewEncapsulation } from './../../kiirus/core'
 
 export class TemplateFor extends Component {
-
   constructor(props) {
     // super({
     //   ...props,
@@ -28,14 +27,16 @@ export class TemplateFor extends Component {
       show: false,
     }
 
-    setTimeout(() => {
-      this.setState({
-        show: !this.state.show
-      })
-    }, 2000)
+    // setTimeout(() => {
+    //   this.setState({
+    //     show: !this.state.show
+    //   })
+    // }, 4000)
   }
 
   connectedCallback () {
+    super.connectedCallback()
+
     Http.get('./public/mock-data.json', { responseType: 'json' })
       .then((people) => {
         this.setState({
@@ -78,7 +79,7 @@ export class TemplateFor extends Component {
             border-collapse: collapse;
           }
           table thead {
-            /* head takes the height it requires, 
+            /* head takes the height it requires,
             and it's not scaled when table is resized */
             flex: 0 0 auto;
             width: calc(100% - 1.1em);
@@ -89,6 +90,7 @@ export class TemplateFor extends Component {
             flex: 1 1 auto;
             display: block;
             overflow-y: auto;
+            overflow-x: auto;
             /* width: calc(100% - 17px); */
           }
           table tbody tr {
@@ -126,5 +128,9 @@ export class TemplateFor extends Component {
         </table>
       </div>
     `
+  }
+
+  select (event) {
+    console.log(event)
   }
 }

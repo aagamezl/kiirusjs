@@ -1,17 +1,4 @@
-// const forRegex = /\s+data-for=\"(\w+)\s+in\s+(\w+)\"/gm
-// const forRegex = /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
-// const expressions = {
-//   for: {
-//     statement: /\s+data-for=\"(\w+)\s+in\s+(.+)\"/gm,
-//     expression:  /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm,
-//   },
-//   if: {
-//     statement: /\s+data-if=\"\s*.+\s*\"/gm,
-//     expression: /<(\w+)\s+(data-if=\"(.+)\")>[\s\S]*?<\/\1>/gm,
-//   },
-// }
-
-import { ForParser, IfParser, TemplateParser } from './parsers'
+import { ForParser, IfParser, TemplateParser } from './'
 
 const placeholderRegex = /({.+})/gm
 
@@ -61,5 +48,4 @@ export class Template {
 
     return TemplateParser.parse(templateAssembled())
   }
-
 }

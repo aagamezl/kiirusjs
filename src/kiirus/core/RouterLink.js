@@ -22,18 +22,14 @@ export class RouterLink extends Component {
   }
 
   handleClick (event) {
-    console.log(event)
-
-    // this.router.navigate(this.state.to/* , event.target.textContent */)
-    // this.router.navigate(this.state.to, this.textContent)
-    this.router.navigate(this.state.path, document.title)
+    this.router.navigate(this.props.path, document.title)
 
     return event.preventDefault()
   }
 
   render () {
-    return `<a href="${this.state.path}"><slot></slot></a>`
+    return `<a href="${this.props.path}"><slot></slot></a>`
   }
 }
 
-// Component.define(RouterLink)
+Component.define(RouterLink)

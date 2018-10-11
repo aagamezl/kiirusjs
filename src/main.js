@@ -3,11 +3,14 @@ import { CustomTab } from './kiirus/components'
 
 import { SimpleTab, SocialButton, TemplateFor } from './examples'
 
-// Component.define(SimpleTab)
+Component.define(CustomTab)
+Component.define(SimpleTab)
 // Component.register([
 //   CustomTab/* ,
 //   SimpleTab, */
 // ])
+
+console.log('main.js')
 
 const router = Router.getInstance().addRoutes([
   {
