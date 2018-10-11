@@ -1,10 +1,9 @@
-import { Component, Http } from './../../kiirus/core'
+import { Component, Http, ViewEncapsulation } from './../../kiirus/core'
 
 export class TemplateFor extends Component {
-
-  constructor(attributes) {
+  constructor(props) {
     // super({
-    //   ...attributes,
+    //   ...props,
     //   people: [{
     //     'id': 1,
     //     'firstName': 'Jack',
@@ -21,10 +20,23 @@ export class TemplateFor extends Component {
     //     'ipAddress': '210.150.175.206'
     //   }]
     // })
-    super(attributes)
+    super(props)
+
+    this.state = {
+      people: [],
+      show: false,
+    }
+
+    // setTimeout(() => {
+    //   this.setState({
+    //     show: !this.state.show
+    //   })
+    // }, 4000)
   }
 
   connectedCallback () {
+    super.connectedCallback()
+
     Http.get('./public/mock-data.json', { responseType: 'json' })
       .then((people) => {
         this.setState({
@@ -67,7 +79,7 @@ export class TemplateFor extends Component {
             border-collapse: collapse;
           }
           table thead {
-            /* head takes the height it requires, 
+            /* head takes the height it requires,
             and it's not scaled when table is resized */
             flex: 0 0 auto;
             width: calc(100% - 1.1em);
@@ -78,6 +90,7 @@ export class TemplateFor extends Component {
             flex: 1 1 auto;
             display: block;
             overflow-y: auto;
+            overflow-x: auto;
             /* width: calc(100% - 17px); */
           }
           table tbody tr {
@@ -88,6 +101,9 @@ export class TemplateFor extends Component {
             table-layout: fixed;
           }
         </style>
+        <div data-if="this.state.show === true">
+          <span>This is a conditional message</span>
+        </div>
         <table class="table table-striped table-bordered">
           <thead>
             <tr>
@@ -100,7 +116,7 @@ export class TemplateFor extends Component {
             </tr>
           </thead>
           <tbody id="people">
-            <tr data-for="person in people">
+            <tr data-for="person in this.state.people">
               <td data-click="select(person)">{person.id}</td>
               <td data-click="select(person.firstName)">{person.firstName}</td>
               <td data-click="select(person.lastName)">{person.lastName}</td>
@@ -112,5 +128,9 @@ export class TemplateFor extends Component {
         </table>
       </div>
     `
+  }
+
+  select (event) {
+    console.log(event)
   }
 }

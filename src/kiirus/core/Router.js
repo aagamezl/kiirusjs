@@ -49,12 +49,10 @@ export class Router {
    * @param {array} routes
    */
   addRoutes(routes) {
-    // '/blog/12'.match(new RegExp('^/blog/:id/show$'.replace(/\//g, '\\/').replace(/:(\w*)/g, '(\\w*)')))
-    // ^\/users\/([^\s]+)\/show$
     this.config.routes = [
       ...this.config.routes,
       ...routes.map(route => {
-        const params = Helper.matchAll(route.path, /:(\w*)/g)
+        const params = Helper.matchAll(/:(\w*)/g, route.path).map(param => param[1])
 
         route.path = new RegExp(`^${route.path.replace(/\//g, '\\/').replace(/:(\w*)/g, '(\\w*)')}$`)
         route.params = params
@@ -105,10 +103,10 @@ export class Router {
 
         return {
           component: route.component,
-          params: match.reduce((obj, value, index) => {
-            obj[route.params[index]] = value
+          params: match.reduce((params, value, index) => {
+            params[route.params[index]] = value
 
-            return obj
+            return params
           }, {}),
         }
       }

@@ -1,12 +1,8 @@
-// const forRegex = /\s+data-for=\"(\w+)\s+in\s+(\w+)\"/gm
-// const forRegex = /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
-const expressions = {
-  forStatement: /\s+data-for=\"(\w+)\s+in\s+(.+)\"/gm,
-  forExpression:  /<(\w+)\s+(data-for=\"(\w+)\s+in\s+(.+))\"\s*>([\s\S]*?)<\/\1>/gm
-}
+import { ForParser, IfParser, TemplateParser } from './'
+
 const placeholderRegex = /({.+})/gm
 
-export default class Template {
+export class Template {
   /**
    * Generate a function representing the template literal for the complete
    * cpmpiled template code
@@ -27,7 +23,9 @@ export default class Template {
    * @returns {string}
    */
   static compile (template) {
-    let html = this.compileFor(this.fixPlaceholders(template))
+    let html = ForParser.compile(this.fixPlaceholders(template))
+
+    html = IfParser.compile(html)
 
     return html
   }
@@ -43,57 +41,11 @@ export default class Template {
     return html.replace(placeholderRegex, '$$$1')
   }
 
-  /**
-   * Compile a for expression, generating the JavaScript code necessary to
-   * produce the HTML according to the data passed to the for expression
-   *
-   * @param {string} html The template code
-   * @param {string} [params = 'data'] The name for the data expression in the
-   * compiled JavaScript code. This name must be the same passed as a parameter
-   * to the assemble function
-   * @returns {string}
-   */
-  static compileFor (html, params = 'data') {
-    const forStatement = this.parseFor(html)
+  static parse (template, component) {
+    const templateAssembled = Template.assemble(
+      Template.compile(template)
+      ).bind(component)
 
-    if (forStatement) {
-      // Clean the data-for statement from the template HTML
-      // html = html.replace(forRegex, '')
-      // html = html.replace(forStatement.expression, '')
-      // forStatement.template = forStatement.template.replace(forStatement.expression, '')
-
-      const compiled = '${' + params + '.' + forStatement.collection +
-        '.map((' + forStatement.iterator + ', index) => ' +
-        // '`' + html + '`).join(\'\')}'
-        '`' + forStatement.template + '`).join(\'\')}'
-
-      html = html.replace(forStatement.template, compiled)
-      html = html.replace(expressions.forStatement, '')
-    }
-
-    return html
-  }
-
-  /**
-   * Parse a for expression, generating an object with the different parts of
-   * the expression, to serve as input of the compileFor method.
-   *
-   * @param {string} html
-   * @returns {Object|undefined}
-   */
-  static parseFor (html) {
-    // const match = forRegex.exec(html)
-    const match = expressions.forExpression.exec(html)
-
-    if (match) {
-      return {
-        template: match[0],
-        expression: match[2],
-        iterator: match[3],
-        collection: match[4],
-      }
-    }
-
-    return undefined
+    return TemplateParser.parse(templateAssembled())
   }
 }
