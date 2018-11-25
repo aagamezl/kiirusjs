@@ -1,3 +1,4 @@
+æ\]
 import { Component } from './../../kiirus/core'
 
 export class SimpleTab extends Component {

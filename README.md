@@ -10,6 +10,7 @@ The idea is to use just Vanilla JavaScript generating as few lines of code as po
 - [X] Implement FOR statement in the template engine.
 - [X] Implement IF statement in the template engine.
 - [X] Implement EVENT statement in the template engine.
+- [ ] Implement CLASS statement in the template engine.
 - [X] Implement View Encapsulation functionality.
 - [X] Implement Router.
 - [X] Implement VirtualDom.
