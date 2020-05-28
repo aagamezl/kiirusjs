@@ -1,0 +1,22 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Router = void 0;
+
+var _component = require("./component");
+
+console.log('Component: %o', _component.Component);
+
+class Router extends _component.Component {
+  constructor(props) {
+    super(props);
+    console.log('');
+  }
+
+}
+
+exports.Router = Router;
+
+_component.Component.define(Router);

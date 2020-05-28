@@ -1,0 +1,7 @@
+"use strict";
+
+var _kiirusJs = require("./../src/kiirus-js");
+
+var _socialButton = require("./components/social-button");
+
+_kiirusJs.app.register(_socialButton.SocialButton);

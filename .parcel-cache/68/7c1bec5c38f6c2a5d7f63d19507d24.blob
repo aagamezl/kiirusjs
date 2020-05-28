@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Web Components</title>
+</head>
+<body>
+  <ul>
+    <li>
+      <router-link path="/social-button/fb/neutral" component="SocialButton">Social Button Facebook</router-link>
+    </li>
+    <li>
+      <router-link path="/social-button/plus/positive" component="SocialButton">Social Button Google Plus</router-link>
+    </li>
+    <li>
+      <router-link path="/social-button/twitter/black" component="SocialButton">Social Button Twitter</router-link>
+    </li>
+    <li>
+      <router-link path="/simple-tab" component="SimpleTab">Custom Tabs</router-link>
+    </li>
+    <li>
+      <router-link path="/template-for" component="TemplateFor">Template For</router-link>
+    </li>
+  </ul>
+
+  <router-outlet></router-outlet>
+
+  <router>
+    <route to="/social-button/:type/:color" component="SocialButton">
+      <router-link path="/social-button/fb/neutral">Social Button Facebook</router-link>
+      <router-link path="/social-button/plus/positive">Social Button Google Plus</router-link>
+      <router-link path="/social-button/twitter/black">Social Button Twitter</router-link>
+    </route>
+
+    <route to="/simple-tab" component="SimpleTab">
+      <router-link path="/simple-tab">Custom Tabs</router-link>
+    </route>
+
+    <route to="/template-for" component="TemplateFor">
+      <router-link path="/template-for">Template For</router-link>
+    </route>
+  </router>
+
+  <script src="db0d1ef61e10fd4ec9c4f55727a0e117"></script>
+</body>
+</html>

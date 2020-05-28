@@ -1,0 +1,57 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Component = void 0;
+
+class Component extends HTMLElement {
+  static define(component, target, attributes = {}) {
+    const tagName = this.getTagName(component); // Check if the custom element is not defined yet
+
+    if (window.customElements.get(tagName) === undefined) {
+      window.customElements.define(tagName, component);
+    }
+
+    if (target !== undefined) {
+      const instance = new component(attributes);
+
+      if (target.childNodes.length > 0) {
+        target.replaceChild(instance, target.childNodes[0]);
+      } else {
+        target.appendChild(instance);
+      }
+
+      return instance;
+    }
+  }
+
+  static getTagName(component) {
+    return component.name.split(/(?=[A-Z])/g).map(value => {
+      return value.charAt(0).toLowerCase() + value.substring(1);
+    }).join('-');
+  }
+
+  constructor(props) {
+    super(props);
+    this.attachShadow({
+      mode: 'open'
+    });
+    this.props = props || {};
+    this.state = {};
+
+    if (this.attributes.length > 0) {
+      // Map attributes to props
+      for (const attribute of this.attributes) {
+        this.props[attribute.name] = attribute.value;
+      }
+    }
+
+    this._currentElement = null;
+    this._pendingState = null;
+    this._parentNode = null;
+  }
+
+}
+
+exports.Component = Component;

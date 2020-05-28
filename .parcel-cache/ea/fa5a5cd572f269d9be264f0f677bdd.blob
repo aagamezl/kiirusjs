@@ -1,0 +1,12 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ViewEncapsulation = void 0;
+const ViewEncapsulation = {
+  Emulated: 0,
+  None: 1,
+  ShadowDom: 2
+};
+exports.ViewEncapsulation = ViewEncapsulation;

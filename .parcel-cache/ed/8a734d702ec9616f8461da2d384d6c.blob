@@ -1,0 +1,11 @@
+"use strict";
+
+var _kiirusJs = require("./../src/kiirus-js");
+
+var _TextComponent = _interopRequireDefault(require("./TextComponent"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_kiirusJs.app.register([1]);
+
+console.log(_kiirusJs.app.components);

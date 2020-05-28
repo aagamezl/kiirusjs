@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Web Components</title>
+</head>
+<body>
+  <!-- <ul>
+    <li>
+      <router-link path="/social-button/fb/neutral" component="SocialButton">Social Button Facebook</router-link>
+    </li>
+    <li>
+      <router-link path="/social-button/plus/positive" component="SocialButton">Social Button Google Plus</router-link>
+    </li>
+    <li>
+      <router-link path="/social-button/twitter/black" component="SocialButton">Social Button Twitter</router-link>
+    </li>
+    <li>
+      <router-link path="/simple-tab" component="SimpleTab">Custom Tabs</router-link>
+    </li>
+    <li>
+      <router-link path="/template-for" component="TemplateFor">Template For</router-link>
+    </li>
+  </ul> -->
+
+  <router-outlet></router-outlet>
+
+  <kiirus-router>
+    <route-config to="/social-button/:type/:color" component="TextComponent">
+      <router-link path="/social-button/fb/neutral">Social Button Facebook</router-link>
+      <router-link path="/social-button/plus/positive">Social Button Google Plus</router-link>
+      <router-link path="/social-button/twitter/black">Social Button Twitter</router-link>
+    </route-config>
+
+    <route-config to="/simple-tab" component="SimpleTab">
+      <router-link path="/simple-tab" component="SimpleTab">Custom Tabs</router-link>
+    </route-config>
+
+    <route-config to="/template-for" component="TemplateFor">
+      <router-link path="/template-for">Template For</router-link>
+    </route-config>
+  </kiirus-router>
+
+  <script src="1bf3a948d13958019a1d4cff4354a670"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.KiirusRouter = void 0;
+
+var _component = require("./component");
+
+class KiirusRouter extends _component.Component {
+  constructor(props) {
+    super(props);
+    console.log('KiirusRouter');
+  }
+
+}
+
+exports.KiirusRouter = KiirusRouter;
+
+_component.Component.define(KiirusRouter);

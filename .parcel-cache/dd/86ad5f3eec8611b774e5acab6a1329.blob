@@ -1,0 +1,11 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ERROR_MESSAGES = void 0;
+const ERROR_MESSAGES = {
+  'KJ0001': 'Router Config path is missing',
+  'KJ0002': 'Router Config component is missing'
+};
+exports.ERROR_MESSAGES = ERROR_MESSAGES;
