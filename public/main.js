@@ -1,5 +1,5 @@
-import { app } from './../src/kiirus-js'
+import { router } from '../src'
 
 import { SocialButton } from './components/social-button'
 
-app.register(SocialButton)
+// router.getInstance().register(SocialButton)

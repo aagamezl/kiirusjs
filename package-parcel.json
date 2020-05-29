@@ -1,0 +1,16 @@
+{
+  "name": "kiirus-components",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "parcel build index.html",
+    "lint": "standard",
+    "start": "parcel serve public/index.html --open"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "parcel": "^2.0.0-alpha.3.2",
+    "standard": "^14.3.4"
+  }
+}

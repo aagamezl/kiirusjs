@@ -10,7 +10,7 @@
 
 <body>
   <ul>
-    <kiirus-router>
+    <kiirus-router test="{foo: 'bar'}">
       <route-config to="/social-button/:type/:color" component="SocialButton">
         <li><router-link path="/social-button/fb/neutral">Social Button Facebook</router-link></li>
         <li><router-link path="/social-button/plus/positive">Social Button Google Plus</router-link></li>
@@ -29,7 +29,7 @@
 
   <router-outlet></router-outlet>
 
-  <script src="./main.js"></script>
+  <!-- <script src="./main.js"></script> -->
 </body>
 
 </html>

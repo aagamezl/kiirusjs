@@ -1,9 +1,0 @@
-"use strict";
-
-var _kiirusJs = require("./../src/kiirus-js");
-
-var _textComponent = require("./text-component");
-
-_kiirusJs.app.register(_textComponent.TextComponent);
-
-console.log(_kiirusJs.app.components);

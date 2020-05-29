@@ -1,4 +1,4 @@
-import { Component } from './../../src/kiirus-js'
+import { Component } from '../../src'
 
 export class SocialButton extends Component {
   render () {
@@ -21,3 +21,5 @@ export class SocialButton extends Component {
     return html
   }
 }
+
+Component.define(SocialButton)
