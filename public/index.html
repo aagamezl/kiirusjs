@@ -10,26 +10,32 @@
 
 <body>
   <ul>
-    <kiirus-router test="{foo: 'bar'}">
-      <route-config to="/social-button/:type/:color" component="SocialButton">
-        <li><router-link path="/social-button/fb/neutral">Social Button Facebook</router-link></li>
-        <li><router-link path="/social-button/plus/positive">Social Button Google Plus</router-link></li>
-        <li><router-link path="/social-button/twitter/black">Social Button Twitter</router-link></li>
-      </route-config>
+    <route-config to="/social-button/:type/:color" component="SocialButton">
+      <li>
+        <route-link path="/social-button/fb/neutral">Social Button Facebook</route-link>
+      </li>
+      <li>
+        <route-link path="/social-button/plus/positive">Social Button Google Plus</route-link>
+      </li>
+      <li>
+        <route-link path="/social-button/twitter/black">Social Button Twitter</route-link>
+      </li>
+    </route-config>
 
-      <route-config to="/simple-tab" component="SimpleTab">
-        <li><router-link path="/simple-tab">Custom Tabs</router-link></li>
-      </route-config>
+    <route-config to="/simple-tab" component="SimpleTab">
+      <li>
+        <route-link path="/simple-tab">Custom Tabs</route-link>
+      </li>
+    </route-config>
 
-      <route-config to="/template-for" component="TemplateFor">
-        <li><router-link path="/template-for">Template For</router-link></li>
-      </route-config>
-    </kiirus-router>
+    <route-config to="/template-for" component="TemplateFor">
+      <li>
+        <route-link path="/template-for">Template For</route-link>
+      </li>
+    </route-config>
   </ul>
 
   <router-outlet></router-outlet>
-
-  <!-- <script src="./main.js"></script> -->
 </body>
 
 </html>

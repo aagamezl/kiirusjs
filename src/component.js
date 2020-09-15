@@ -1,3 +1,5 @@
+import { createElement, mount, render, HTMLParser } from './virtual-dom'
+
 export class Component extends HTMLElement {
   constructor (props) {
     super(props)
@@ -17,7 +19,55 @@ export class Component extends HTMLElement {
   }
 
   connectedCallback () {
-    this.shadowRoot.innerHTML = this.render()
+    const previous = []
+    let ast = undefined
+    let current = undefined
+
+    HTMLParser(this.render(), {
+      start: (tag, props, unary) => {
+        const attrs = props.reduce((attrs, props) => {
+          attrs[props.name] = props.value
+
+          return attrs
+        }, [])
+
+        const newElement = createElement(tag, { attrs })
+
+        if (unary === false) {
+          if (ast === undefined) {
+            current = newElement
+
+            ast = current
+          } else {
+            current.children.push(newElement)
+
+            previous.push(current)
+            current = newElement
+          }
+        } else {
+          if (!current) {
+            current = newElement
+
+            ast = current
+          } else {
+            current.children.push(newElement)
+          }
+        }
+      },
+      end: (tag) => {
+        current = previous.pop()
+      },
+      chars: (text) => {
+        if (text.trim()) {
+          current.props.children.push(text)
+        }
+      },
+      comment: (text) => {
+      }
+    })
+
+    // this.shadowRoot.innerHTML = this.render()
+    mount(render(ast), this.shadowRoot)
   }
 
   // will be overridden

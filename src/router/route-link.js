@@ -1,13 +1,13 @@
-import { Component } from './component'
-// import { Router } from './router'
-import { router } from './router'
+import { Component } from '../component'
+import { Router } from './router'
 
-export class RouterLink extends Component {
+export class RouteLink extends Component {
+  static get viewEncapsulation() { return ViewEncapsulation.ShadowDom }
+
   constructor (attributes) {
     super(attributes)
 
-    // this.router = Router.getInstance()
-    this.router = router.getInstance()
+    this.router = Router.getInstance()
 
     this.handleClick = this.handleClick.bind(this)
   }
@@ -35,4 +35,4 @@ export class RouterLink extends Component {
   }
 }
 
-Component.define(RouterLink)
+Component.define(RouteLink)

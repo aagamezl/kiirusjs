@@ -1,9 +1,21 @@
-// import app from './app'
-import { Component } from './component'
+import { Component } from './../component'
 
-// let instance
+/**
+ * A route for the router
+ *
+ * @typedef {Object} Route
+ * @property {string} path - Indicates the path for the route
+ * @property {string} component - Indicates the component to render for the route path
+ * @property {object} [params] - Indicates the route params
+ */
 
-export const router = {
+export const Router = {
+  /**
+   * Add a route to the router
+   *
+   * @param {Route} route
+   * @returns {Router}
+   */
   addRoute (route) {
     const params = Array.from(route.path.matchAll(/:(\w*)/g)).map(param => param[1])
 
@@ -11,8 +23,16 @@ export const router = {
     route.params = params
 
     this.config.routes.push(route)
+
+    return this
   },
 
+  /**
+   * Add a set of routes to the router
+   *
+   * @param {Array<Route>} routes
+   * @returns {Router}
+   */
   addRoutes (routes) {
     this.config.routes = [
       ...this.config.routes,
@@ -29,15 +49,26 @@ export const router = {
     return this
   },
 
+  /**
+   * Returns a router instance
+   *
+   * @returns {Router}
+   */
   getInstance () {
-    if (router.config === undefined) {
-      router.init()
+    if (Router.config === undefined) {
+      Router.init()
     }
 
-    return router
+    return Router
   },
 
-  getRoutes (path) {
+  /**
+   * Returns the route that match with the given path
+   *
+   * @param {string} path
+   * @returns {Route}
+   */
+  getRoute (path) {
     for (const route of this.config.routes) {
       let match = path.match(route.path)
 
@@ -46,6 +77,7 @@ export const router = {
 
         return {
           component: route.component,
+          path,
           params: match.reduce((params, value, index) => {
             params[route.params[index]] = value
 
@@ -72,46 +104,64 @@ export const router = {
     }
 
     // Store the initial content so we can revisit it later
-    history.replaceState({
-      url: document.location.pathname
-    }, document.title, document.location.href)
+    history.replaceState(
+      { url: document.location.pathname },
+      document.title,
+      document.location.href
+    )
 
     // Revert to a previously saved state
     window.addEventListener('popstate', (event) => {
       console.log('popstate fired!')
 
-      this.run(event.state.url)
+      this.injectComponent(event.state.url)
     })
   },
 
+  /**
+   * Navigate to the given url
+   *
+   * @param {string} url
+   * @param {string} title
+   * @param {object} data
+   * @returns {void}
+   */
   navigate (url, title = '', data = {}) {
     data.url = url
 
     history.pushState(data, title, document.location.origin + url)
 
-    this.run(url)
+    this.injectComponent(url)
+
+    // const { component, params } = this.getRoute(url)
+
+    // if (component !== undefined) {
+    //   const Constructor = window.customElements.get(Component.getTagName({ name: component }))
+
+    //   if (this.routerOutlet !== undefined) {
+    //     const instance = new Constructor(params)
+
+    //     if (this.routerOutlet.childNodes.length > 0) {
+    //       this.routerOutlet.firstChild.replaceWith(instance)
+    //     } else {
+    //       this.routerOutlet.appendChild(instance)
+    //     }
+
+    //     return instance
+    //   }
+    // }
   },
 
-  register (components) {
-    if (Array.isArray(components)) {
-      this.components.push(...components)
-    } else {
-      this.components.push(components)
-    }
-  },
-
-  async run (url) {
+  /**
+   *
+   * @param {string} url
+   */
+  injectComponent (url) {
     url = url || document.location.pathname
 
-    const { component, params } = this.getRoutes(url)
+    const { component, params } = this.getRoute(url)
 
     if (component !== undefined) {
-      // Component.define(
-      //   this.components.find(item => item.name === component),
-      //   this.routerOutlet,
-      //   params
-      // )
-
       const Constructor = window.customElements.get(Component.getTagName({ name: component }))
 
       if (this.routerOutlet !== undefined) {
